@@ -1,0 +1,232 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class AdvancedFraudDetectionAWT extends Frame
+implements ActionListener {
+/**
+*
+*/
+private static final long serialVersionUID = 1L;
+// Components
+Label lblTransactionId, lblCardHolder, lblAmount,
+lblLocation, lblResult, lblHistory, lblTime;
+TextField txtTransactionId, txtCardHolder, txtAmount,
+txtLocation, txtTime;
+Button btnCheckFraud, btnClearAll, btnResetHistory;
+TextArea txtHistory;
+
+// List to store past transactions
+List<String> transactionHistory = new ArrayList<>();
+int failedAttempts = 0; // Counter for failed attempts
+
+public AdvancedFraudDetectionAWT() {
+
+11
+
+// Set layout
+setLayout(new GridLayout(9, 2, 10, 10));
+
+// Initialize components
+lblTransactionId = new Label("Transaction ID:");
+txtTransactionId = new TextField();
+
+lblCardHolder = new Label("Card Holder:");
+txtCardHolder = new TextField();
+
+lblAmount = new Label("Amount:");
+txtAmount = new TextField();
+
+lblLocation = new Label("Location:");
+txtLocation = new TextField();
+
+lblTime = new Label("Time (HH:mm):");
+txtTime = new TextField(new
+SimpleDateFormat("HH:mm").format(new Date())); //
+Default current time
+
+lblResult = new Label("Result: ");
+lblResult.setForeground(Color.BLUE);
+
+lblHistory = new Label("Transaction History:");
+txtHistory = new TextArea();
+txtHistory.setEditable(false);
+
+btnCheckFraud = new Button("Check Fraud");
+btnCheckFraud.addActionListener(this);
+
+btnClearAll = new Button("Clear All");
+btnClearAll.addActionListener(this);
+
+btnResetHistory = new Button("Reset History");
+btnResetHistory.addActionListener(this);
+
+// Add components to frame
+add(lblTransactionId);
+add(txtTransactionId);
+
+add(lblCardHolder);
+add(txtCardHolder);
+
+add(lblAmount);
+add(txtAmount);
+
+add(lblLocation);
+add(txtLocation);
+
+add(lblTime);
+add(txtTime);
+
+add(btnCheckFraud);
+add(btnClearAll);
+
+add(lblResult);
+
+13
+
+add(btnResetHistory);
+
+add(lblHistory);
+add(txtHistory);
+
+// Set frame properties
+setTitle("Advanced Fraud Detection System");
+setSize(600, 500);
+setVisible(true);
+
+// Close button functionality
+addWindowListener(new WindowAdapter() {
+public void windowClosing(WindowEvent e) {
+System.exit(0);
+}
+});
+}
+// Check fraud logic
+@Override
+public void actionPerformed(ActionEvent e) {
+if (e.getSource() == btnCheckFraud) {
+try {
+String transactionId = txtTransactionId.getText();
+String cardHolder = txtCardHolder.getText();
+double amount =
+Double.parseDouble(txtAmount.getText());
+String location = txtLocation.getText();
+
+14
+String time = txtTime.getText();
+
+// Fraud detection logic
+boolean isFraudulent = checkFraud(amount,
+location, time);
+
+// Generate result and add to history
+String result = "Transaction ID: " + transactionId
++ ", Card Holder: " + cardHolder
++ ", Amount: " + amount + ", Location: " +
+location + ", Time: " + time + " -> ";
+if (isFraudulent) {
+lblResult.setText("Result: Transaction is
+Fraudulent!");
+lblResult.setForeground(Color.RED);
+result += "Fraudulent";
+} else {
+lblResult.setText("Result: Transaction is
+Safe.");
+lblResult.setForeground(Color.GREEN);
+result += "Safe";
+}
+
+// Update history
+transactionHistory.add(result);
+updateHistory();
+
+} catch (NumberFormatException ex) {
+lblResult.setText("Error: Invalid amount!");
+lblResult.setForeground(Color.RED);
+failedAttempts++;
+if (failedAttempts >= 3) {
+lblResult.setText("Warning: Multiple invalid
+attempts detected!");
+}
+}
+} else if (e.getSource() == btnClearAll) {
+clearFields();
+} else if (e.getSource() == btnResetHistory) {
+resetHistory();
+}
+}
+
+// Fraud detection rules
+private boolean checkFraud(double amount, String
+location, String time) {
+final double HIGH_RISK_AMOUNT = 5000.0; //
+Amount above which transactions are flagged
+final String[] BLOCKED_LOCATIONS =
+{"CountryX", "CountryY"};
+final String[] HIGH_RISK_HOURS = {"00:00",
+"01:00", "02:00", "03:00", "04:00"}; // Midnight to 4 AM
+
+// Rule 1: High amount
+if (amount > HIGH_RISK_AMOUNT) {
+return true;
+
+16
+
+}
+
+// Rule 2: Suspicious location
+for (String blocked : BLOCKED_LOCATIONS) {
+if (blocked.equalsIgnoreCase(location)) {
+return true;
+}
+}
+// Rule 3: Time-based fraud
+for (String highRiskTime : HIGH_RISK_HOURS) {
+if (time.startsWith(highRiskTime.substring(0, 2))) {
+// Match hour
+return true;
+}
+}
+
+return false;
+}
+
+// Update transaction history display
+private void updateHistory() {
+txtHistory.setText("");
+for (String record : transactionHistory) {
+txtHistory.append(record + "\n");
+}
+}
+
+17
+
+// Clear input fields and result
+private void clearFields() {
+txtTransactionId.setText("");
+txtCardHolder.setText("");
+txtAmount.setText("");
+txtLocation.setText("");
+txtTime.setText(new
+SimpleDateFormat("HH:mm").format(new Date())); //
+Reset to current time
+lblResult.setText("Result:");
+lblResult.setForeground(Color.BLUE);
+}
+
+// Reset transaction history
+private void resetHistory() {
+transactionHistory.clear();
+txtHistory.setText("");
+lblResult.setText("History cleared.");
+lblResult.setForeground(Color.BLUE);
+}
+
+// Main method
+public static void main(String[] args) {
+new AdvancedFraudDetectionAWT();
+}
+}
